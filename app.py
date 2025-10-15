@@ -11,12 +11,12 @@ from flask import Flask, render_template, request, session, redirect, url_for
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-key-123')
 
-# Render-specific database path
+# Database setup for Render
 def get_db_path():
     return '/tmp/tambola.db' if 'RENDER' in os.environ else 'tambola.db'
 
 def init_db():
-    conn = sqlite3.connect(get_db_path(), check_same_thread=False)
+    conn = sqlite3.connect(get_db_path())
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS users
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,7 +28,7 @@ def init_db():
     conn.close()
 
 def get_db():
-    conn = sqlite3.connect(get_db_path(), check_same_thread=False)
+    conn = sqlite3.connect(get_db_path())
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -138,12 +138,11 @@ def admin():
     
     return render_template('admin.html', users=user_list)
 
-# Health check endpoint for Render
 @app.route('/health')
 def health():
     return 'OK'
 
-# Initialize database when app starts
+# Initialize database
 init_db()
 
 if __name__ == '__main__':
